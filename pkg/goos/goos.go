@@ -19,10 +19,17 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 	svc := s3.New(s)
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
+		if r.URL.String() == "/" {
+			log(r.RemoteAddr, r.URL.String(), "/")
+			notFound(w)
+			return
+		}
+
 		url, err := url.QueryUnescape(r.URL.String())
 		if err != nil {
 			log(r.RemoteAddr, r.URL.String(), "404")
-			http.NotFound(w, r)
+			notFound(w)
+			return
 		}
 
 		input := &s3.GetObjectInput{
@@ -35,17 +42,21 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 				switch aerr.Code() {
 				case s3.ErrCodeNoSuchKey:
 					log(r.RemoteAddr, url, "404")
-					http.NotFound(w, r)
+					notFound(w)
+					return
 				default:
-					w.Write([]byte(aerr.Error()))
+					log(r.RemoteAddr, url, "404")
+					notFound(w)
+					return
 				}
 			} else {
 				// Print the error, cast err to awserr.Error to get the Code and
 				// Message from an error.
-				w.Write([]byte(err.Error()))
+				log(r.RemoteAddr, url, "404")
+				notFound(w)
+				return
 			}
 
-			return
 		}
 
 		w.Header().Set("Content-Length", strconv.FormatInt(*result.ContentLength, 10))
@@ -66,6 +77,12 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 	}
 
 	return http.HandlerFunc(fn)
+}
+
+func notFound(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Header().Set("Cache-Control", "max-age:0, private")
+	w.Write([]byte("Not Found."))
 }
 
 func log(remote string, url string, status string) {

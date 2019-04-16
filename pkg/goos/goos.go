@@ -80,8 +80,8 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 }
 
 func notFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
 	w.Header().Set("Cache-Control", "max-age:0, private")
+	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("Not Found."))
 }
 

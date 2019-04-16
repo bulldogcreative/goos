@@ -19,7 +19,7 @@ func main() {
 		Region:      aws.String("us-east-2"),
 	}
 	sess := session.New(s3Config)
-	handler := goos.S3Handler(sess, "bucket")
+	handler := goos.S3Handler(sess, os.Getenv("aws_bucket"))
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
 }

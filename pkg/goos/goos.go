@@ -10,13 +10,34 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-// S3Handler will return the handler we need
-func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
-	svc := s3.New(s)
+// Goos holds the information to connect to an S3 compatible Object Storage Service
+type Goos struct {
+	KeyID    string
+	Secret   string
+	Endpoint string
+	Region   string
+	Bucket   string
+}
+
+func (g *Goos) session() *session.Session {
+	s3Config := &aws.Config{
+		Credentials: credentials.NewStaticCredentials(g.KeyID, g.Secret, ""),
+		Endpoint:    aws.String(g.Endpoint),
+		Region:      aws.String(g.Region),
+	}
+	sess := session.New(s3Config)
+
+	return sess
+}
+
+// Handler will return the handler we need
+func (g *Goos) Handler() http.HandlerFunc {
+	svc := s3.New(g.session())
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
 		if r.URL.String() == "/" {
@@ -33,7 +54,7 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 		}
 
 		input := &s3.GetObjectInput{
-			Bucket: aws.String(bucket),
+			Bucket: aws.String(g.Bucket),
 			Key:    aws.String(url),
 		}
 		result, err := svc.GetObject(input)

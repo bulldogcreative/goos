@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"log/syslog"
 	"net/http"
 	"os"
 
@@ -19,6 +21,12 @@ func main() {
 		Region:      aws.String("us-east-2"),
 	}
 	sess := session.New(s3Config)
+
+	logwriter, e := syslog.New(syslog.LOG_NOTICE, "goos")
+	if e == nil {
+		log.SetOutput(logwriter)
+	}
+
 	handler := goos.S3Handler(sess, os.Getenv("aws_bucket"))
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)

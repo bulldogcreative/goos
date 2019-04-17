@@ -40,15 +40,17 @@ func (g *Goos) Handler() http.HandlerFunc {
 	svc := s3.New(g.session())
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
+		ip := r.Header.Get("X-Real-Ip")
+
 		if r.URL.String() == "/" {
-			logMessage(r.RemoteAddr, r.URL.String(), "/")
+			logMessage(ip, r.URL.String(), "/")
 			notFound(w)
 			return
 		}
 
 		url, err := url.QueryUnescape(r.URL.String())
 		if err != nil {
-			logMessage(r.RemoteAddr, r.URL.String(), "404")
+			logMessage(ip, r.URL.String(), "404")
 			notFound(w)
 			return
 		}
@@ -59,7 +61,7 @@ func (g *Goos) Handler() http.HandlerFunc {
 		}
 		result, err := svc.GetObject(input)
 		if err != nil {
-			logMessage(r.RemoteAddr, url, "404")
+			logMessage(ip, url, "404")
 			notFound(w)
 			return
 		}
@@ -73,12 +75,12 @@ func (g *Goos) Handler() http.HandlerFunc {
 
 		_, err = io.Copy(w, result.Body)
 		if err != nil {
-			logMessage(r.RemoteAddr, url, "500")
+			logMessage(ip, url, "500")
 			notFound(w)
 			return
 		}
 
-		logMessage(r.RemoteAddr, url, "200")
+		logMessage(ip, url, "200")
 	}
 
 	return http.HandlerFunc(fn)

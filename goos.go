@@ -1,7 +1,6 @@
 package goos
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +13,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+// Logger interface
+type Logger interface {
+	Print(string)
+}
+
 // Goos holds the information to connect to an S3 compatible Object Storage Service
 type Goos struct {
 	KeyID    string
@@ -21,6 +25,7 @@ type Goos struct {
 	Endpoint string
 	Region   string
 	Bucket   string
+	Logger
 }
 
 func (g *Goos) session() *session.Session {
@@ -43,14 +48,14 @@ func (g *Goos) Handler() http.HandlerFunc {
 		ip := r.Header.Get("X-Forwarded-For")
 
 		if r.URL.String() == "/" {
-			logMessage(cf, ip, r.URL.String(), "/")
+			g.logMessage(cf, ip, r.URL.String(), "/")
 			notFound(w)
 			return
 		}
 
 		url, err := url.QueryUnescape(r.URL.String())
 		if err != nil {
-			logMessage(cf, ip, r.URL.String(), "404")
+			g.logMessage(cf, ip, r.URL.String(), "404")
 			notFound(w)
 			return
 		}
@@ -61,7 +66,7 @@ func (g *Goos) Handler() http.HandlerFunc {
 		}
 		result, err := svc.GetObject(input)
 		if err != nil {
-			logMessage(cf, ip, url, "404")
+			g.logMessage(cf, ip, url, "404")
 			notFound(w)
 			return
 		}
@@ -75,12 +80,12 @@ func (g *Goos) Handler() http.HandlerFunc {
 
 		_, err = io.Copy(w, result.Body)
 		if err != nil {
-			logMessage(cf, ip, url, "500")
+			g.logMessage(cf, ip, url, "500")
 			notFound(w)
 			return
 		}
 
-		logMessage(cf, ip, url, "200")
+		g.logMessage(cf, ip, url, "200")
 	}
 
 	return http.HandlerFunc(fn)
@@ -92,6 +97,9 @@ func notFound(w http.ResponseWriter) {
 	w.Write([]byte("Not Found."))
 }
 
-func logMessage(cf string, ip string, url string, status string) {
-	fmt.Println("[" + cf + "|" + ip + "] " + "[" + url + "] " + "[" + status + "]")
+func (g *Goos) logMessage(cf string, ip string, url string, status string) {
+	if g.Logger == nil {
+		return
+	}
+	g.Print("[" + cf + "|" + ip + "] " + "[" + url + "] " + "[" + status + "]")
 }

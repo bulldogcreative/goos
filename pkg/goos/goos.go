@@ -2,7 +2,7 @@ package goos
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -19,14 +19,14 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
 		if r.URL.String() == "/" {
-			log(r.RemoteAddr, r.URL.String(), "/")
+			logMessage(r.RemoteAddr, r.URL.String(), "/")
 			notFound(w)
 			return
 		}
 
 		url, err := url.QueryUnescape(r.URL.String())
 		if err != nil {
-			log(r.RemoteAddr, r.URL.String(), "404")
+			logMessage(r.RemoteAddr, r.URL.String(), "404")
 			notFound(w)
 			return
 		}
@@ -37,7 +37,7 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 		}
 		result, err := svc.GetObject(input)
 		if err != nil {
-			log(r.RemoteAddr, url, "404")
+			logMessage(r.RemoteAddr, url, "404")
 			notFound(w)
 			return
 		}
@@ -56,7 +56,7 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 		w.Write([]byte(bf.String()))
 
 		// Print Request Details
-		log(r.RemoteAddr, url, "200")
+		logMessage(r.RemoteAddr, url, "200")
 	}
 
 	return http.HandlerFunc(fn)
@@ -68,6 +68,7 @@ func notFound(w http.ResponseWriter) {
 	w.Write([]byte("Not Found."))
 }
 
-func log(remote string, url string, status string) {
-	fmt.Println("[" + time.Now().Format(time.RFC3339) + "] [" + remote + "] " + "[" + url + "] " + "[" + status + "]")
+func logMessage(remote string, url string, status string) {
+	//fmt.Println("[" + time.Now().Format(time.RFC3339) + "] [" + remote + "] " + "[" + url + "] " + "[" + status + "]")
+	log.Print("[" + remote + "] [" + url + "] [" + status + "]")
 }

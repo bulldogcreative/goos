@@ -1,8 +1,8 @@
 package goos
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -63,6 +63,7 @@ func (g *Goos) Handler() http.HandlerFunc {
 			notFound(w)
 			return
 		}
+		defer result.Body.Close()
 
 		w.Header().Set("Content-Length", strconv.FormatInt(*result.ContentLength, 10))
 		w.Header().Set("Last-Modified", result.LastModified.Format("Mon, 02 Jan 2006 15:04:05 MST"))
@@ -70,14 +71,13 @@ func (g *Goos) Handler() http.HandlerFunc {
 		w.Header().Set("Cache-Control", "max-age:290304000")
 		w.Header().Set("Etag", *result.ETag)
 
-		// fmt.Println(result)
+		_, err = io.Copy(w, result.Body)
+		if err != nil {
+			logMessage(r.RemoteAddr, url, "500")
+			notFound(w)
+			return
+		}
 
-		bf := new(bytes.Buffer)
-		bf.ReadFrom(result.Body)
-
-		w.Write(bf.Bytes())
-
-		// Print Request Details
 		logMessage(r.RemoteAddr, url, "200")
 	}
 

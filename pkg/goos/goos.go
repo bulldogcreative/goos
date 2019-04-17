@@ -46,7 +46,7 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 		w.Header().Set("Content-Length", strconv.FormatInt(*result.ContentLength, 10))
 		w.Header().Set("Last-Modified", result.LastModified.Format("Mon, 02 Jan 2006 15:04:05 MST"))
 		w.Header().Set("Expires", time.Now().AddDate(60, 0, 0).Format(http.TimeFormat))
-		w.Header().Set("Cache-Control", "max-age:290304000, public")
+		w.Header().Set("Cache-Control", "max-age:290304000")
 		w.Header().Set("Etag", *result.ETag)
 
 		// fmt.Println(result)

@@ -2,6 +2,7 @@ package goos
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -69,6 +70,6 @@ func notFound(w http.ResponseWriter) {
 }
 
 func logMessage(remote string, url string, status string) {
-	//fmt.Println("[" + time.Now().Format(time.RFC3339) + "] [" + remote + "] " + "[" + url + "] " + "[" + status + "]")
+	fmt.Println("[" + time.Now().Format(time.RFC3339) + "] [" + remote + "] " + "[" + url + "] " + "[" + status + "]")
 	log.Print("[" + remote + "] [" + url + "] [" + status + "]")
 }

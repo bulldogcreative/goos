@@ -37,6 +37,20 @@ func main() {
 }
 ```
 
+## nginx config
+
+```nginx
+server {
+	server_name cdn.example.com;
+
+	location / {
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_pass http://127.0.0.1:8080;
+	}
+}
+```
+
 ## Response Headers
 
 [Last-Modified](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified)

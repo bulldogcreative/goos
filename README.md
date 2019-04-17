@@ -12,11 +12,19 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bulldogcreative/goos/pkg/goos"
+	"github.com/bulldogcreative/goos"
 )
+
+type logger struct{}
+
+func (l *logger) Print(input string) {
+	fmt.Println(input)
+}
 
 func main() {
 	fmt.Println("Starting")
+
+	log := &logger{}
 
 	g := &goos.Goos{
 		KeyID:    os.Getenv("aws_access_key_id"),
@@ -24,12 +32,8 @@ func main() {
 		Endpoint: "https://nyc3.digitaloceanspaces.com",
 		Region:   "us-east-2",
 		Bucket:   os.Getenv("aws_bucket"),
+		Logger:   log,
 	}
-
-	// logwriter, e := syslog.New(syslog.LOG_NOTICE, "goos")
-	// if e == nil {
-	// 	log.SetOutput(logwriter)
-	// }
 
 	handler := g.Handler()
 	http.HandleFunc("/", handler)

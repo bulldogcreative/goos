@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -38,25 +37,9 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 		}
 		result, err := svc.GetObject(input)
 		if err != nil {
-			if aerr, ok := err.(awserr.Error); ok {
-				switch aerr.Code() {
-				case s3.ErrCodeNoSuchKey:
-					log(r.RemoteAddr, url, "404")
-					notFound(w)
-					return
-				default:
-					log(r.RemoteAddr, url, "404")
-					notFound(w)
-					return
-				}
-			} else {
-				// Print the error, cast err to awserr.Error to get the Code and
-				// Message from an error.
-				log(r.RemoteAddr, url, "404")
-				notFound(w)
-				return
-			}
-
+			log(r.RemoteAddr, url, "404")
+			notFound(w)
+			return
 		}
 
 		w.Header().Set("Content-Length", strconv.FormatInt(*result.ContentLength, 10))

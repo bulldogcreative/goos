@@ -41,8 +41,10 @@ func (g *Goos) session() *session.Session {
 
 // Handler will return the handler we need
 func (g *Goos) Handler() http.HandlerFunc {
-	svc := s3.New(g.session())
+
 	fn := func(w http.ResponseWriter, r *http.Request) {
+
+		svc := s3.New(g.session())
 
 		cf := r.Header.Get("X-Real-Ip")
 		ip := r.Header.Get("X-Forwarded-For")

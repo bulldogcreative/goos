@@ -54,7 +54,7 @@ func S3Handler(s *session.Session, bucket string) http.HandlerFunc {
 		bf := new(bytes.Buffer)
 		bf.ReadFrom(result.Body)
 
-		w.Write([]byte(bf.String()))
+		w.Write(bf.Bytes())
 
 		// Print Request Details
 		logMessage(r.RemoteAddr, url, "200")

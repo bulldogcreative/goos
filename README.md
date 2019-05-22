@@ -80,6 +80,9 @@ RestartSec=5s
 Environment=aws_access_key_id=abcdef223
 Environment=aws_secret_access_key=abcdef
 Environment=aws_bucket=example-bucket
+Environment=aws_endpoint=https://nyc3.digitaloceanspaces.com
+Environment=aws_region=us-east-2
+Environment=goos_port=8080
 ExecStart=/home/user/goos
 
 [Install]

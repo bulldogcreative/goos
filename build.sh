@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=v1.0.0
+version=v1.0.1
 
 env GOOS=windows GOARCH=amd64 go build -o dist/goos.exe cmd/main.go
 cd dist

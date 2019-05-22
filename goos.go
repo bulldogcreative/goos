@@ -73,6 +73,7 @@ func (g *Goos) Handler() http.HandlerFunc {
 		defer result.Body.Close()
 
 		w.Header().Set("Content-Length", strconv.FormatInt(*result.ContentLength, 10))
+		w.Header().Set("Content-Type", *result.ContentType)
 		w.Header().Set("Last-Modified", result.LastModified.Format("Mon, 02 Jan 2006 15:04:05 MST"))
 		w.Header().Set("Expires", time.Now().AddDate(60, 0, 0).Format(http.TimeFormat))
 		w.Header().Set("Cache-Control", "max-age:290304000")

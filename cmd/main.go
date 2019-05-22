@@ -22,8 +22,8 @@ func main() {
 	g := &goos.Goos{
 		KeyID:    os.Getenv("aws_access_key_id"),
 		Secret:   os.Getenv("aws_secret_access_key"),
-		Endpoint: "https://nyc3.digitaloceanspaces.com",
-		Region:   "us-east-2",
+		Endpoint: os.Getenv("aws_endpoint"),
+		Region:   os.Getenv("aws_region"),
 		Bucket:   os.Getenv("aws_bucket"),
 		Logger:   log,
 	}
@@ -35,5 +35,5 @@ func main() {
 
 	handler := g.Handler()
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+os.Getenv("goos_port"), nil)
 }
